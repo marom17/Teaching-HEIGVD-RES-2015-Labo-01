@@ -93,7 +93,7 @@ public class Application implements IApplication {
        * one method provided by this class, which is responsible for storing the content of the
        * quote in a text file (and for generating the directories based on the tags).
        */
-      storeQuote(quote,quote.getLink());
+        storeQuote(quote,"quotes-"+(i+1)+".utf8");
       LOG.info(quote.getSource());
       for (String tag : quote.getTags()) {
         LOG.info("> " + tag);
@@ -127,7 +127,21 @@ public class Application implements IApplication {
    * @throws IOException 
    */
   void storeQuote(Quote quote, String filename) throws IOException {
-    FileOutputStream fos  = new FileOutputStream(filename);
+      String[] tags=quote.getTags();
+      String path=WORKSPACE_DIRECTORY+File.separator;
+      
+      
+      for(int i=0;i<tags.length;i++){
+          path+=tags[i];
+          path+=File.separator;
+      }
+      
+      File file = new File(path);
+      file.mkdirs();
+      path+=filename;
+      file=new File(path);
+        FileOutputStream fos  = new FileOutputStream(file);
+    
     fos.write(quote.getQuote().getBytes());
     fos.close();
   }
