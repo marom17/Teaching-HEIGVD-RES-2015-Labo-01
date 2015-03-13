@@ -18,6 +18,9 @@ import java.util.logging.Logger;
 public class FileNumberingFilterWriter extends FilterWriter {
 
   private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
+  private int nbLine=1;
+  private String previous="";
+  private boolean first=true;
 
   public FileNumberingFilterWriter(Writer out) {
     super(out);
@@ -25,17 +28,86 @@ public class FileNumberingFilterWriter extends FilterWriter {
 
   @Override
   public void write(String str, int off, int len) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
+      
+      String sep="";
+      String buf="";
+      String temp=str.substring(off, len-off);
+      if(!previous.equals("")){
+          if(temp.contains("\r\n")||previous.contains("\r\n")){
+              sep="\r\n";
+          }
+          else if(temp.contains("\n")||previous.contains("\n")){
+              sep="\n";
+          }
+          else if(temp.contains("\r")||previous.contains("\r")){
+              sep="\r";
+          }
+      }
+      else{
+          if(temp.contains("\r\n")){
+              sep="\r\n";
+          }
+          else if(temp.contains("\n")){
+              sep="\n";
+          }
+          else if(temp.contains("\r")){
+              sep="\r";
+          }
+      }
+      String[] split=temp.split(sep);
+      if(previous.equals("")){
+          buf+=nbLine+"\t";
+          nbLine++;
+      }
+      /*
+      else if(previous.endsWith(sep)){
+          buf+=nbLine+"\t";
+          nbLine++;
+      }*/
+      buf+=split[0];
+      if(split.length>1){
+          buf+=sep;
+      }
+      for(int i=1;i<split.length;i++){
+          buf+=nbLine+"\t"+split[i];
+          nbLine++;
+          if(i!=split.length-1){
+              buf+=sep;
+          }
+      }
+      if(temp.endsWith(sep)){
+          buf+=sep+nbLine+"\t";
+          nbLine++;
+      }
+      previous="";
+      previous=previous.concat(buf);
+      super.write(buf, off, buf.length());
+      
   }
 
   @Override
   public void write(char[] cbuf, int off, int len) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
+    write(cbuf.toString(),off,len);
   }
 
   @Override
   public void write(int c) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
+          if(first){
+              first=false;
+              super.write(Integer.toString(nbLine));
+              nbLine++;
+          }
+          if(c==(int)'\n'){
+              
+              super.write((char)c);
+              super.write(Integer.toString(nbLine));
+              nbLine++;
+            }
+          else{
+              super.write((char)c);
+          }
+          super.flush();
+    //throw new UnsupportedOperationException("The student has not implemented this method yet.");
   }
 
 }
