@@ -7,10 +7,9 @@ import java.io.Writer;
 import java.util.logging.Logger;
 
 /**
- * This class transforms the streams of character sent to the decorated writer.
- * When filter encounters a line separator, it sends it to the decorated writer.
- * It then sends the line number and a tab character, before resuming the write
- * process.
+ * This class transforms the streams of character sent to the decorated writer. When
+ * filter encounters a line separator, it sends it to the decorated writer. It then
+ * sends the line number and a tab character, before resuming the write process.
  *
  * Hello\n\World -> 1\Hello\n2\tWorld
  *
@@ -18,66 +17,56 @@ import java.util.logging.Logger;
  */
 public class FileNumberingFilterWriter extends FilterWriter {
 
-  private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
-  private int nbLine=1;
-  private boolean previousR=false;
+    private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
+    private int nbLine = 1;
 
-  public FileNumberingFilterWriter(Writer out) {
-    super(out);
-  }
+    public FileNumberingFilterWriter(Writer out) {
+        super(out);
+    }
 
-  @Override
-  public void write(String str, int off, int len) throws IOException {
-      
-      String buf="";
-      String temp=str.substring(off, off+len);
-      
-      String[] split = Utils.getNextLine(temp);
-      
-      if(nbLine==1){
-          out.write((nbLine++)+"\t");
-      }
-      
-      while(!split[0].isEmpty()){
-          buf+=split[0]+(nbLine++)+"\t";
-          split = Utils.getNextLine(split[1]);
-      }
-      buf+=split[1];
-      out.write(buf);
-      
-  }
+    @Override
+    public void write(String str, int off, int len) throws IOException {
 
-  @Override
-  public void write(char[] cbuf, int off, int len) throws IOException {
-    write(cbuf.toString(),off,len);
-  }
+        String buf = "";
+        String temp = str.substring(off, off + len);
 
-  @Override
-  public void write(int c) throws IOException {
-      String buf="";
-          if(nbLine==1){
-              buf=Integer.toString(nbLine);
-              nbLine++;
-          }
-          
-          if(c==(int)'\n'&&previousR==true){
-              
-              buf+=((char)c)+nbLine+"\t";
-              nbLine++;
-              previousR=false;
+        String[] split = Utils.getNextLine(temp);
+
+        if (nbLine == 1) {
+            out.write((nbLine++) + "\t");
+        }
+
+        while (!split[0].isEmpty()) {
+            buf += split[0] + (nbLine++) + "\t";
+            split = Utils.getNextLine(split[1]);
+        }
+        buf += split[1];
+        out.write(buf);
+
+    }
+
+    @Override
+    public void write(char[] cbuf, int off, int len) throws IOException {
+        write(cbuf.toString(), off, len);
+    }
+
+    @Override
+    public void write(int c) throws IOException {
+        String buf = "";
+        if (nbLine == 1) {
+            buf += Integer.toString(nbLine++) + "\t"+((char)c);
+        } else {
+            if (c == '\n') {
+
+                buf += ((char)c) + Integer.toString(nbLine++) + "\t";
+            } else {
+                buf += ((char)c);
+                
             }
-          else{
-              buf+=(char)c;
-          }
-          if(c==(int)'\r'){
-              previousR=true;
-              buf+=(char)c;
-          }
-          else{
-              previousR=false;
-          }
-          out.write(buf);
-          out.flush();
-  }
+            
+        }
+        out.write(buf);
+        out.flush();
+    }
 
 }
