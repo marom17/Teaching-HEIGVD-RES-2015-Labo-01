@@ -19,6 +19,7 @@ public class FileNumberingFilterWriter extends FilterWriter {
 
     private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
     private int nbLine = 1;
+    private int previous;
 
     public FileNumberingFilterWriter(Writer out) {
         super(out);
@@ -56,15 +57,17 @@ public class FileNumberingFilterWriter extends FilterWriter {
         if (nbLine == 1) {
             buf += Integer.toString(nbLine++) + "\t"+((char)c);
         } else {
-            if (c == '\n') {
+            if (previous == '\n'||(previous=='\r'&&c!='\n')) {
 
-                buf += ((char)c) + Integer.toString(nbLine++) + "\t";
+                buf += Integer.toString(nbLine++) + "\t";
+                buf+= ((char)c);
             } else {
                 buf += ((char)c);
                 
             }
             
         }
+        previous=c;
         out.write(buf);
         out.flush();
     }
